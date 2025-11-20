@@ -337,6 +337,31 @@ export namespace Config {
   export const Mcp = z.discriminatedUnion("type", [McpLocal, McpRemote])
   export type Mcp = z.infer<typeof Mcp>
 
+  export const UtcpRemote = z
+    .object({
+      type: z.literal("remote").describe("Type of UTCP provider connection"),
+      url: z.string().describe("URL of the remote UTCP provider"),
+      enabled: z.boolean().optional().describe("Enable or disable the UTCP provider"),
+      headers: z.record(z.string(), z.string()).optional().describe("Headers to send with the request"),
+      variables: z.record(z.string(), z.string()).optional().describe("Variable mappings for the UTCP provider"),
+      timeout: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe(
+          "Timeout in ms for fetching tools from the UTCP provider. Defaults to 5000 (5 seconds) if not specified.",
+        ),
+    })
+    .strict()
+    .meta({
+      ref: "UtcpRemoteConfig",
+    })
+
+  export const UtcpProvider = UtcpRemote // Start with remote only
+  export type UtcpProvider = z.infer<typeof UtcpProvider>
+  export type UtcpRemote = z.infer<typeof UtcpRemote>
+
   export const Permission = z.enum(["ask", "allow", "deny"])
   export type Permission = z.infer<typeof Permission>
 
@@ -541,6 +566,10 @@ export namespace Config {
         .optional()
         .describe("Custom provider configurations and model overrides"),
       mcp: z.record(z.string(), Mcp).optional().describe("MCP (Model Context Protocol) server configurations"),
+      utcp: z
+        .record(z.string(), UtcpProvider)
+        .optional()
+        .describe("UTCP (Universal Tool Calling Protocol) provider configurations"),
       formatter: z
         .union([
           z.literal(false),

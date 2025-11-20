@@ -33,6 +33,7 @@ import { mergeDeep, pipe } from "remeda"
 import { ToolRegistry } from "../tool/registry"
 import { Wildcard } from "../util/wildcard"
 import { MCP } from "../mcp"
+import { UTCP } from "../utcp"
 import { LSP } from "../lsp"
 import { ReadTool } from "../tool/read"
 import { ListTool } from "../tool/ls"
@@ -776,6 +777,72 @@ export namespace SessionPrompt {
       }
       tools[key] = item
     }
+
+    // Add UTCP tools (completely separate from MCP)
+    for (const [key, item] of Object.entries(await UTCP.tools())) {
+      if (Wildcard.all(key, enabledTools) === false) continue
+      const execute = item.execute
+      if (!execute) continue
+      item.execute = async (args, opts) => {
+        await Plugin.trigger(
+          "tool.execute.before",
+          {
+            tool: key,
+            sessionID: input.sessionID,
+            callID: opts.toolCallId,
+          },
+          {
+            args,
+          },
+        )
+        const result = await execute(args, opts)
+
+        await Plugin.trigger(
+          "tool.execute.after",
+          {
+            tool: key,
+            sessionID: input.sessionID,
+            callID: opts.toolCallId,
+          },
+          result,
+        )
+
+        const textParts: string[] = []
+        const attachments: MessageV2.FilePart[] = []
+
+        for (const item of result.content) {
+          if (item.type === "text") {
+            textParts.push(item.text)
+          } else if (item.type === "image") {
+            attachments.push({
+              id: Identifier.ascending("part"),
+              sessionID: input.sessionID,
+              messageID: input.processor.message.id,
+              type: "file",
+              mime: item.mimeType,
+              url: `data:${item.mimeType};base64,${item.data}`,
+            })
+          }
+          // Add support for other types if needed
+        }
+
+        return {
+          title: "",
+          metadata: result.metadata ?? {},
+          output: textParts.join("\n\n"),
+          attachments,
+          content: result.content, // directly return content to preserve ordering when outputting to model
+        }
+      }
+      item.toModelOutput = (result) => {
+        return {
+          type: "text",
+          value: result.output,
+        }
+      }
+      tools[key] = item
+    }
+
     return tools
   }
 

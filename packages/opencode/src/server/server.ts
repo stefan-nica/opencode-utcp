@@ -34,6 +34,7 @@ import { lazy } from "../util/lazy"
 import { Todo } from "../session/todo"
 import { InstanceBootstrap } from "../project/bootstrap"
 import { MCP } from "../mcp"
+import { UTCP, Status } from "../utcp"
 import { Storage } from "../storage/storage"
 import type { ContentfulStatusCode } from "hono/utils/http-status"
 import { TuiEvent } from "@/cli/cmd/tui/event"
@@ -1454,6 +1455,77 @@ export namespace Server {
           const { name, config } = c.req.valid("json")
           const result = await MCP.add(name, config)
           return c.json(result.status)
+        },
+      )
+      .get(
+        "/utcp",
+        describeRoute({
+          description: "Get UTCP provider status",
+          operationId: "utcp.status",
+          responses: {
+            200: {
+              description: "UTCP provider status",
+              content: {
+                "application/json": {
+                  schema: resolver(z.record(z.string(), Status)),
+                },
+              },
+            },
+          },
+        }),
+        async (c) => {
+          return c.json(await UTCP.status())
+        },
+      )
+      .post(
+        "/utcp",
+        describeRoute({
+          description: "Add UTCP provider dynamically",
+          operationId: "utcp.add",
+          responses: {
+            200: {
+              description: "UTCP provider added successfully",
+              content: {
+                "application/json": {
+                  schema: resolver(z.record(z.string(), Status)),
+                },
+              },
+            },
+            ...errors(400),
+          },
+        }),
+        validator(
+          "json",
+          z.object({
+            name: z.string(),
+            config: Config.UtcpProvider,
+          }),
+        ),
+        async (c) => {
+          const { name, config } = c.req.valid("json")
+          const result = await UTCP.add(name, config)
+          return c.json(result.status)
+        },
+      )
+      .get(
+        "/utcp/tools",
+        describeRoute({
+          description: "List available UTCP tools",
+          operationId: "utcp.tools",
+          responses: {
+            200: {
+              description: "List of UTCP tools",
+              content: {
+                "application/json": {
+                  schema: resolver(z.array(z.string())),
+                },
+              },
+            },
+          },
+        }),
+        async (c) => {
+          const tools = await UTCP.tools()
+          return c.json(Object.keys(tools))
         },
       )
       .get(

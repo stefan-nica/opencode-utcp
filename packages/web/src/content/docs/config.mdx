@@ -330,6 +330,23 @@ You can configure MCP servers you want to use through the `mcp` option.
 
 ---
 
+### UTCP providers
+
+You can configure UTCP (Universal Tool Calling Protocol) providers you want to use through the `utcp` option.
+
+```json title="opencode.json"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "utcp": {}
+}
+```
+
+UTCP is a simpler protocol than MCP for adding external tools. Unlike MCP which requires a persistent connection, UTCP providers are queried on-demand.
+
+[Learn more here](/docs/utcp-providers).
+
+---
+
 ### Instructions
 
 You can configure the instructions for the model you're using through the `instructions` option.

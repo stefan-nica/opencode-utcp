@@ -19,6 +19,12 @@ import { Binary } from "@/util/binary"
 import { createSimpleContext } from "./helper"
 import type { Snapshot } from "@/snapshot"
 import { useExit } from "./exit"
+
+// Temporary type definition until SDK is regenerated
+type UtcpStatus = {
+  status: "connected" | "disabled" | "failed"
+  error?: string
+}
 import { batch, onMount } from "solid-js"
 
 export const { use: useSync, provider: SyncProvider } = createSimpleContext({
@@ -54,6 +60,9 @@ export const { use: useSync, provider: SyncProvider } = createSimpleContext({
       mcp: {
         [key: string]: McpStatus
       }
+      utcp: {
+        [key: string]: UtcpStatus
+      }
       formatter: FormatterStatus[]
     }>({
       config: {},
@@ -71,6 +80,7 @@ export const { use: useSync, provider: SyncProvider } = createSimpleContext({
       part: {},
       lsp: [],
       mcp: {},
+      utcp: {},
       formatter: [],
     })
 
@@ -257,6 +267,11 @@ export const { use: useSync, provider: SyncProvider } = createSimpleContext({
             sdk.client.command.list().then((x) => setStore("command", x.data ?? [])),
             sdk.client.lsp.status().then((x) => setStore("lsp", x.data!)),
             sdk.client.mcp.status().then((x) => setStore("mcp", x.data!)),
+            // TODO: Replace with sdk.client.utcp.status() once SDK is regenerated
+            fetch(`http://localhost:3000/utcp`)
+              .then((r) => r.json())
+              .then((x) => setStore("utcp", x))
+              .catch(() => setStore("utcp", {})),
             sdk.client.formatter.status().then((x) => setStore("formatter", x.data!)),
             sdk.client.session.status().then((x) => setStore("session_status", x.data!)),
           ]).then(() => {

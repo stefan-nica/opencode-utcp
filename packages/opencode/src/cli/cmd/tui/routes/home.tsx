@@ -19,23 +19,44 @@ export function Home() {
     return Object.values(sync.data.mcp).some((x) => x.status === "failed")
   })
 
+  const utcpError = createMemo(() => {
+    return Object.values(sync.data.utcp).some((x) => x.status === "failed")
+  })
+
   const Hint = (
-    <Show when={Object.keys(sync.data.mcp).length > 0}>
-      <box flexShrink={0} flexDirection="row" gap={1}>
-        <text fg={theme.text}>
-          <Switch>
-            <Match when={mcpError()}>
-              <span style={{ fg: theme.error }}>•</span> mcp errors{" "}
-              <span style={{ fg: theme.textMuted }}>ctrl+x s</span>
-            </Match>
-            <Match when={true}>
-              <span style={{ fg: theme.success }}>•</span>{" "}
-              {Locale.pluralize(Object.values(sync.data.mcp).length, "{} mcp server", "{} mcp servers")}
-            </Match>
-          </Switch>
-        </text>
-      </box>
-    </Show>
+    <>
+      <Show when={Object.keys(sync.data.mcp).length > 0}>
+        <box flexShrink={0} flexDirection="row" gap={1}>
+          <text fg={theme.text}>
+            <Switch>
+              <Match when={mcpError()}>
+                <span style={{ fg: theme.error }}>•</span> mcp errors{" "}
+                <span style={{ fg: theme.textMuted }}>ctrl+x s</span>
+              </Match>
+              <Match when={true}>
+                <span style={{ fg: theme.success }}>•</span>{" "}
+                {Locale.pluralize(Object.values(sync.data.mcp).length, "{} mcp server", "{} mcp servers")}
+              </Match>
+            </Switch>
+          </text>
+        </box>
+      </Show>
+      <Show when={Object.keys(sync.data.utcp).length > 0}>
+        <box flexShrink={0} flexDirection="row" gap={1}>
+          <text fg={theme.text}>
+            <Switch>
+              <Match when={utcpError()}>
+                <span style={{ fg: theme.error }}>•</span> utcp errors{" "}
+              </Match>
+              <Match when={true}>
+                <span style={{ fg: theme.success }}>•</span>{" "}
+                {Locale.pluralize(Object.values(sync.data.utcp).length, "{} utcp provider", "{} utcp providers")}
+              </Match>
+            </Switch>
+          </text>
+        </box>
+      </Show>
+    </>
   )
 
   let prompt: PromptRef

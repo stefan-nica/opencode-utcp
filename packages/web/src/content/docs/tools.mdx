@@ -3,7 +3,7 @@ title: Tools
 description: Manage the tools an LLM can use.
 ---
 
-Tools allow the LLM to perform actions in your codebase. OpenCode comes with a set of built-in tools, but you can extend it with [custom tools](/docs/custom-tools) or [MCP servers](/docs/mcp-servers).
+Tools allow the LLM to perform actions in your codebase. OpenCode comes with a set of built-in tools, but you can extend it with [custom tools](/docs/custom-tools), [MCP servers](/docs/mcp-servers), or [UTCP providers](/docs/utcp-providers).
 
 By default, all tools are **enabled** and don't need permission to run. But you can configure this and control the [permissions](/docs/permissions) through your config.
 
@@ -294,6 +294,14 @@ Custom tools let you define your own functions that the LLM can call. These are 
 MCP (Model Context Protocol) servers allow you to integrate external tools and services. This includes database access, API integrations, and third-party services.
 
 [Learn more](/docs/mcp-servers) about configuring MCP servers.
+
+---
+
+## UTCP providers
+
+UTCP (Universal Tool Calling Protocol) providers offer a simpler way to add external tools without maintaining persistent connections. UTCP tools are queried on-demand and executed via HTTP requests.
+
+[Learn more](/docs/utcp-providers) about configuring UTCP providers.
 
 ---
 

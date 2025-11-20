@@ -52,6 +52,39 @@ export function DialogStatus() {
           </For>
         </box>
       </Show>
+      <Show when={Object.keys(sync.data.utcp).length > 0} fallback={<text>No UTCP Providers</text>}>
+        <box>
+          <text fg={theme.text}>{Object.keys(sync.data.utcp).length} UTCP Providers</text>
+          <For each={Object.entries(sync.data.utcp)}>
+            {([key, item]) => (
+              <box flexDirection="row" gap={1}>
+                <text
+                  flexShrink={0}
+                  style={{
+                    fg: {
+                      connected: theme.success,
+                      failed: theme.error,
+                      disabled: theme.textMuted,
+                    }[item.status],
+                  }}
+                >
+                  •
+                </text>
+                <text fg={theme.text} wrapMode="word">
+                  <b>{key}</b>{" "}
+                  <span style={{ fg: theme.textMuted }}>
+                    <Switch>
+                      <Match when={item.status === "connected"}>Connected</Match>
+                      <Match when={item.status === "failed" && item}>{(val) => val().error}</Match>
+                      <Match when={item.status === "disabled"}>Disabled in configuration</Match>
+                    </Switch>
+                  </span>
+                </text>
+              </box>
+            )}
+          </For>
+        </box>
+      </Show>
       {sync.data.lsp.length > 0 && (
         <box>
           <text fg={theme.text}>{sync.data.lsp.length} LSP Servers</text>
